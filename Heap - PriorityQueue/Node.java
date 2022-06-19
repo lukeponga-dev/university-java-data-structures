@@ -1,21 +1,20 @@
 public class Node {
 
     // variables
-    int minHeap;
-    int Priority;
+    int priority;
 
     /**
      * Constructor
      * 
      * @param capacity
      */
-    public Node(int capacity) {
-        minHeap = capacity;
+    public Node(int priority) {
+        this.priority = priority;
     }
 
     @Override
     public String toString() {
 
-        return "Priority:" + minHeap;
+        return "Priority:" + priority;
     }
 }

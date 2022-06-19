@@ -1,21 +1,29 @@
-import java.util.Arrays;
-
 /**
- * {@index PriorityQueue Implements a Priority Queue using an arrary of nodes,}
+ * {@index }
+ * priorityQueue Implements a priority Queue using an arrary of nodes,
  * sorted with minheap
  *
  * {@author Luke Ponga}
  */
 public class PriorityQueue {
 
-    // Constructor //
-    Node[] minHeap;
+    // Min heap stored as an array of nodes
+    private Node[] minHeap;
+    // pointer to the next position
+    private int size;
 
-    int next = 0;
-
+    /**
+     * Initialises a new priority queue, creates the min heap, and sets size to 0
+     *
+     * @param capacity Max capacity to be given to the min heap
+     */
     public PriorityQueue(int capacity) {
-        minHeap = new Node[capacity + 1];
-        next = 1;
+        if (capacity < 1) {
+            capacity = 1;
+        }
+
+        minHeap = new Node[capacity];
+        size = 0;
     }
 
     // Methods //
@@ -26,9 +34,26 @@ public class PriorityQueue {
      * {@param n}, the node into priority queue
      */
     public void insert(Node n) {
-        minHeap[next] = n;
-        upheap(next);
-        next++;
+        if (n == null) {
+            return;
+        }
+
+        minHeap[size] = n;
+        size++;
+        upheap(size - 1);
+
+        if (size == minHeap.length) {
+            increaseMaxSize();
+        }
+    }
+
+    /**
+     * Doubles the capacity of minHeap
+     */
+    private void increaseMaxSize() {
+        Node[] newheap = new Node[minHeap.length * 2];
+        System.arraycopy(minHeap, 0, newheap, 0, minHeap.length);
+        minHeap = newheap;
     }
 
     /**
@@ -37,51 +62,37 @@ public class PriorityQueue {
      * renoves highest priority node
      */
     public Node delete() {
-        // set root to 1
-        int root = 1;
-        int lastLeft = next - 1;
-        // Check if heap is empty
-        if (next == 1) {
-            return peek();
+        if (size == 0) {
+            return null;
         }
-        // If root is last leaf delete it
-        if (root == lastLeft) {
-            minHeap[lastLeft].minHeap = 0;
-            next--;
-        } else {
-            swap(root, lastLeft);
-            minHeap[lastLeft].minHeap = 0;
-            next--;
-        }
+        Node n = minHeap[0];
+        minHeap[0] = minHeap[size - 1];
+        minHeap[size - 1] = null;
+        size--;
+        downHeap(0);
+        return n;
+        // // set root to 1
+        // int root = 1;
+        // int lastLeft = size - 1;
+        // // Check if heap is empty
+        // if (size == 1) {
+        // return peek();
+        // }
+        // // If root is last leaf delete it
+        // if (root == lastLeft) {
+        // minHeap[lastLeft].minHeap = 0;
+        // size--;
+        // } else {
+        // swap(root, lastLeft);
+        // minHeap[lastLeft].minHeap = 0;
+        // size--;
+        // }
 
-        downHeap();
-        return peek();
-    }
-
-    private Node peek() {
-        return minHeap[1];
+        // downHeap();
+        // return peek();
     }
 
     // Helper methods //
-
-    /**
-     * method swap
-     * swaps pos1 and pos2 without overwritting them
-     * by creating temp variable
-     * 
-     * @param pos1
-     * @param pos2
-     */
-    private void swap(int pos1, int pos2) {
-        // Store value of position one
-        Node temp = minHeap[pos1];
-
-        // Set value of position one to equal position 2
-        minHeap[pos1] = minHeap[pos2];
-
-        // Set value of position two to equal temp
-        minHeap[pos2] = temp;
-    }
 
     /**
      * method upheap
@@ -91,50 +102,47 @@ public class PriorityQueue {
      */
     private void upheap(int pos) {
         // Set child to current node
-        int child = pos;
+        if (pos > 0 && minHeap[pos].priority < minHeap[(pos - 1) / 2].priority) {
+            Node temp = minHeap[(pos - 1) / 2];
+            minHeap[(pos - 1) / 2] = minHeap[pos];
+            minHeap[pos] = temp;
 
-        // While child node is greater than 1
-        while (child > 1) {
-            int parent = child / 2;
-
-            // If childs value is less than parents value
-            if (minHeap[child].minHeap < minHeap[parent].minHeap) {
-                // Swap child and parent values,
-                swap(child, parent);
-            }
-            child = parent;
+            upheap((pos - 1) / 2);
         }
+        // // While child node is greater than 1
+        // while (child > 1) {
+        // int parent = child / 2;
+
+        // // If childs value is less than parents value
+        // if (minHeap[child].minHeap < minHeap[parent].minHeap) {
+        // // Swap child and parent values,
+        // swap(child, parent);
+        // }
+        // child = parent;
+        // }
     }
 
     /**
      * method downHeap
-     * 
+     *
      * @return
      *
      */
-    private void downHeap() {
-        int smallest = -1;
-        int parent = 1;
-        while (parent < next) {
-            int left = parent * 2;
-            int right = parent * 2 + 1;
-
-            if (left < next && minHeap[left].minHeap < minHeap[parent].minHeap) {
-                smallest = left;
-            }
-
-            if (right < next && minHeap[right].minHeap < minHeap[smallest].minHeap) {
-                smallest = right;
-            }
-
-            if (parent != smallest) {
-                swap(smallest, parent);
-                parent = smallest;
-            } else {
-                // exit loop
-                break;
-            }
-
+    private void downHeap(int i) {
+        int smallest = i;
+        int left = i * 2 + 1;
+        int right = i * 2 + 2;
+        if (left < size && minHeap[left].priority < minHeap[smallest].priority) {
+            smallest = left;
+        }
+        if (right < size && minHeap[right].priority < minHeap[smallest].priority) {
+            smallest = right;
+        }
+        if (smallest != i) {
+            Node temp = minHeap[i];
+            minHeap[i] = minHeap[smallest];
+            minHeap[smallest] = temp;
+            downHeap(smallest);
         }
     }
 
@@ -144,6 +152,44 @@ public class PriorityQueue {
      * prints the minheap the console
      */
     public void dump() {
-        System.out.println("Priority: " + Arrays.toString(minHeap));
+        for (int i = 0; i < size; i++) {
+            System.out.println(
+                    "Root: " +
+                            minHeap[i] +
+                            "; left: " +
+                            leftChild(i) +
+                            "; right: " +
+                            rightChild(i));
+        }
+    }
+
+    /**
+     * Gets the left child of the node at a given position, unless left child
+     * would be at a position outside minheap, in which case returns null
+     *
+     * @param i Position of the parent node
+     * @return The left child of a given node
+     */
+    private Node leftChild(int i) {
+        if (i * 2 + 1 >= size) {
+            return null;
+        } else {
+            return minHeap[i * 2 + 1];
+        }
+    }
+
+    /**
+     * Gets the left child of the node at a given position, unless left child
+     * would be at a position outside minheap, in which case returns null
+     *
+     * @param i Position of the parent node
+     * @return The right child of a given node
+     */
+    private Node rightChild(int i) {
+        if (i * 2 + 2 >= size) {
+            return null;
+        } else {
+            return minHeap[i * 2 + 2];
+        }
     }
 }

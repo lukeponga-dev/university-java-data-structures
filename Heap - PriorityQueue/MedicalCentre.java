@@ -1,23 +1,56 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class MedicalCentre {
 
-    public void processQueue(String string) {
-        try (FileReader fw = new FileReader(string);
-                BufferedReader bw = new BufferedReader(fw)) {
-            System.out.println();
+    private PriorityQueue pq;
+
+    public MedicalCentre() {
+        pq = new PriorityQueue(1000);
+    }
+
+    public void processQueue(String fileName) {
+        int nextPatientNumber = 1;
+        try {
+            File file = new File(fileName);
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) {
+                String str = scanner.nextLine();
+                String[] split = str.split(",");
+                int priority;
+                String patientName = split[0];
+                int patientAge = Integer.parseInt(split[1]);
+                String medicalSeverity = split[2];
+                if (medicalSeverity.equals("low")) {
+                    priority = 3;
+                } else if (medicalSeverity.equals("medium") && patientAge < 65) {
+                    priority = 2;
+                } else {
+                    priority = 1;
+                }
+
+                Patient p = new Patient(
+                        priority,
+                        patientName,
+                        patientAge,
+                        medicalSeverity,
+                        nextPatientNumber);
+                nextPatientNumber++;
+
+                pq.insert(p);
+            }
+
+            Patient P = (Patient) pq.delete();
+            while (P != null) {
+                System.out.println(P.toStringLong());
+                P = (Patient) pq.delete();
+            }
             // more code
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
             // exception handling left as an exercise for the reader
         }
     }
-
 }
